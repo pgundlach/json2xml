@@ -1,0 +1,14 @@
+{
+    "whatever": [
+        "foo",
+        3.45,
+        "bar",
+        1
+    ],
+    "something": {
+        "another": "object",
+        "and an": [
+            "array"
+        ]
+    }
+}
