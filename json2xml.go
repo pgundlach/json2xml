@@ -75,74 +75,84 @@ encodeLoop:
 			case '{':
 				inMap = append(inMap, true)
 				if key == "" {
-					enc.EncodeToken(mapElt)
+					if enc.EncodeToken(mapElt); err != nil {
+						return err
+					}
 				} else {
 					attr := xml.Attr{Name: xml.Name{Local: "key"}, Value: key}
 					se := mapElt.Copy()
 					se.Attr = []xml.Attr{attr}
-					err = enc.EncodeToken(se)
+					if err = enc.EncodeToken(se); err != nil {
+						return err
+					}
 				}
 				key = ""
 			case '[':
 				inMap = append(inMap, false)
 				if key == "" {
-					enc.EncodeToken(aryElt)
+					if err = enc.EncodeToken(aryElt); err != nil {
+						return err
+					}
 				} else {
 					attr := xml.Attr{Name: xml.Name{Local: "key"}, Value: key}
 					se := aryElt.Copy()
 					se.Attr = []xml.Attr{attr}
-					err = enc.EncodeToken(se)
+					if err = enc.EncodeToken(se); err != nil {
+						return err
+					}
 				}
 				key = ""
 			case ']':
 				inMap = inMap[:len(inMap)-1]
 				if key != "" {
-					err = encodeString(enc, key, "")
-					if err != nil {
+					if err = encodeString(enc, key, ""); err != nil {
 						return err
 					}
 					key = ""
 				}
-				enc.EncodeToken(aryElt.End())
+				if err = enc.EncodeToken(aryElt.End()); err != nil {
+					return err
+				}
 			case '}':
 				inMap = inMap[:len(inMap)-1]
 				if key != "" {
-					err = encodeString(enc, key, "")
-					if err != nil {
+					if err = encodeString(enc, key, ""); err != nil {
 						return err
 					}
 					key = ""
 				}
-				enc.EncodeToken(mapElt.End())
+				if err = enc.EncodeToken(mapElt.End()); err != nil {
+					return err
+				}
 			}
 		case string:
 			if inMap[len(inMap)-1] {
 				if key != "" {
-					encodeString(enc, t, key)
+					if err = encodeString(enc, t, key); err != nil {
+						return err
+					}
 					key = ""
 				} else {
 					key = t
 				}
 
 			} else {
-				err = encodeString(enc, t, "")
-				if err != nil {
+				if err = encodeString(enc, t, ""); err != nil {
 					return err
 				}
 			}
 		case float64, bool:
-			if key != "" {
-				encodeString(enc, fmt.Sprint(t), key)
-				key = ""
-			} else {
-				encodeString(enc, fmt.Sprint(t), "")
+			if err = encodeString(enc, fmt.Sprint(t), key); err != nil {
+				return err
 			}
+			key = ""
 		default:
 			panic("not implemented")
 		}
 	}
 
-	enc.EncodeToken(root.End())
-	enc.Flush()
-	return nil
+	if err = enc.EncodeToken(root.End()); err != nil {
+		return err
+	}
+	return enc.Flush()
 }
