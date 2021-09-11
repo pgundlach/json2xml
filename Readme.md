@@ -36,6 +36,25 @@ func main() {
 }
 ```
 
+where `myfile.json` is:
+
+```json
+{
+    "whatever": [
+        "foo",
+        3.45,
+        "bar",
+        1
+    ],
+    "something": {
+        "another": "object",
+        "and an": [
+            "array"
+        ]
+    }
+}
+```
+
 The (formatted) result is:
 
 ```xml
